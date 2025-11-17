@@ -1,1 +1,1 @@
-![SilkThoughts Blog](https://iiedtt3r8m.ufs.sh/f/dXzGhag6oavT9PnVv13QITmCYsGdbk2qvWR0u816B5VzFiNU)
+![SilkThoughts Blog](https://iiedtt3r8m.ufs.sh/f/dXzGhag6oavTxnt4ISh13rTNVkbtEpHwu0yzvK51ClciRmUS)
