@@ -1,7 +1,7 @@
 "use client"
 
-import { ArrowRight, BookOpen, TrendingUp } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { ArrowRight, BookOpen, TrendingUp, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 
 interface Category {
   id: number;
@@ -13,6 +13,73 @@ interface Tag {
   id: number;
   name: string;
   slug: string;
+}
+
+interface CustomDropdownProps {
+  options: { id: number; name: string; slug: string }[];
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+}
+
+function CustomDropdown({ options, value, onChange, placeholder }: CustomDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(opt => opt.slug === value);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="appearance-none px-6 py-3 pr-10 bg-white/5 backdrop-blur-md border border-white/20 text-white/70 rounded-full text-sm focus:outline-none focus:border-white/40 hover:bg-white/10 transition-all cursor-pointer w-48"
+      >
+        <span className={selectedOption ? 'text-white' : 'text-white/70'}>
+          {selectedOption ? selectedOption.name : placeholder}
+        </span>
+        <ChevronDown className={`absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full mt-2 w-48 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl shadow-black/20 overflow-hidden z-50">
+          <div className="max-h-60 overflow-y-auto">
+            <button
+              onClick={() => {
+                onChange('');
+                setIsOpen(false);
+              }}
+              className="w-full px-6 py-3 text-left text-white/70 hover:bg-white/10 transition-colors text-sm"
+            >
+              {placeholder}
+            </button>
+            {options.map(option => (
+              <button
+                key={option.id}
+                onClick={() => {
+                  onChange(option.slug);
+                  setIsOpen(false);
+                }}
+                className="w-full px-6 py-3 text-left text-white hover:bg-white/10 transition-colors text-sm"
+              >
+                {option.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function Home() {
@@ -56,7 +123,7 @@ export default function Home() {
       }`}>
         <div className={`mx-auto transition-all duration-500 ease-in-out ${
           isScrolled 
-            ? 'max-w-4xl px-6 py-3  backdrop-blur-md  rounded-full shadow-2xl shadow-black/10' 
+            ? 'max-w-4xl px-6 py-3 backdrop-blur-md rounded-full shadow-2xl shadow-black/10' 
             : 'max-w-7xl px-8'
         } flex items-center justify-between`}>
           <div className="flex items-center gap-2">
@@ -95,42 +162,29 @@ export default function Home() {
             A curated collection of thoughts worth reading.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 mb-16 w-full max-w-2xl">
-            <select 
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full text-sm focus:outline-none focus:border-white/40"
-            >
-              <option value="">All Categories</option>
-              {categories.map(category => (
-                <option key={category.id} value={category.slug}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-            <select 
-              value={selectedTag}
-              onChange={(e) => setSelectedTag(e.target.value)}
-              className="px-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full text-sm focus:outline-none focus:border-white/40"
-            >
-              <option value="">All Tags</option>
-              {tags.map(tag => (
-                <option key={tag.id} value={tag.slug}>
-                  {tag.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 mb-16">
-            <button className="group px-8 py-4 bg-white text-slate-900 rounded-full text-lg font-medium hover:bg-white/90 transition-all shadow-2xl shadow-black/20 flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row gap-4 mb-12">
+            <button className="group px-8 py-4 bg-white text-slate-900 rounded-full text-lg font-medium hover:bg-white/90 transition-all shadow-2xl shadow-black/20 flex items-center gap-2 justify-center">
               Explore Stories
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
-            <button className="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full text-lg font-medium hover:bg-white/20 transition-all flex items-center gap-2">
+            <button className="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full text-lg font-medium hover:bg-white/20 transition-all flex items-center gap-2 justify-center">
               <BookOpen className="w-5 h-5" />
               Latest Posts
             </button>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <CustomDropdown
+              options={categories}
+              value={selectedCategory}
+              onChange={setSelectedCategory}
+              placeholder="All Categories"
+            />
+            <CustomDropdown
+              options={tags}
+              value={selectedTag}
+              onChange={setSelectedTag}
+              placeholder="All Tags"
+            />
           </div>
         </div>
       </div>
