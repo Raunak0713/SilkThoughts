@@ -1,10 +1,26 @@
 "use client"
 
-import { ArrowRight, BookOpen, Sparkles, TrendingUp } from 'lucide-react';
+import { ArrowRight, BookOpen, TrendingUp } from 'lucide-react';
 import { useState, useEffect } from 'react';
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+interface Tag {
+  id: number;
+  name: string;
+  slug: string;
+}
 
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedTag, setSelectedTag] = useState<string>('');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +33,18 @@ export default function Home() {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    fetch('http://localhost:1337/api/categories')
+      .then(res => res.json())
+      .then(data => setCategories(data.data || []))
+      .catch(err => console.error('Error fetching categories:', err));
+
+    fetch('http://localhost:1337/api/tags')
+      .then(res => res.json())
+      .then(data => setTags(data.data || []))
+      .catch(err => console.error('Error fetching tags:', err));
   }, []);
 
   return (
@@ -66,6 +94,33 @@ export default function Home() {
             Discover stories that glide through your mind with elegance. 
             A curated collection of thoughts worth reading.
           </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 mb-16 w-full max-w-2xl">
+            <select 
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full text-sm focus:outline-none focus:border-white/40"
+            >
+              <option value="">All Categories</option>
+              {categories.map(category => (
+                <option key={category.id} value={category.slug}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+            <select 
+              value={selectedTag}
+              onChange={(e) => setSelectedTag(e.target.value)}
+              className="px-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full text-sm focus:outline-none focus:border-white/40"
+            >
+              <option value="">All Tags</option>
+              {tags.map(tag => (
+                <option key={tag.id} value={tag.slug}>
+                  {tag.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-16">
             <button className="group px-8 py-4 bg-white text-slate-900 rounded-full text-lg font-medium hover:bg-white/90 transition-all shadow-2xl shadow-black/20 flex items-center gap-2">

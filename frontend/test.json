@@ -1,0 +1,66 @@
+{
+  "data": [
+    {
+      "id": 2,
+      "documentId": "xoq7hook70k2em31j5yr2rq1",
+      "name": "JavaScript",
+      "slug": "javascript",
+      "createdAt": "2025-11-17T10:02:33.068Z",
+      "updatedAt": "2025-11-17T10:02:33.068Z",
+      "publishedAt": "2025-11-17T10:02:33.075Z",
+      "blogs": []
+    },
+    {
+      "id": 4,
+      "documentId": "ai7syz9d3egcp48jqgm9ta7k",
+      "name": "ReactJS",
+      "slug": "react",
+      "createdAt": "2025-11-17T10:02:47.290Z",
+      "updatedAt": "2025-11-17T10:02:47.290Z",
+      "publishedAt": "2025-11-17T10:02:47.295Z",
+      "blogs": []
+    },
+    {
+      "id": 6,
+      "documentId": "udjr4aopeoaxdw0lxj5tpsx0",
+      "name": "NextJS",
+      "slug": "nextjs",
+      "createdAt": "2025-11-17T10:02:56.618Z",
+      "updatedAt": "2025-11-17T10:02:56.618Z",
+      "publishedAt": "2025-11-17T10:02:56.623Z",
+      "blogs": [
+        {
+          "id": 2,
+          "documentId": "lzzo6c8hcthntpa3c9tqianp",
+          "createdAt": "2025-11-17T10:06:43.271Z",
+          "updatedAt": "2025-11-17T10:06:43.271Z",
+          "publishedAt": "2025-11-17T10:06:43.283Z",
+          "title": "Demo Blog",
+          "slug": "demo-blog",
+          "description": "Demo Blog Description",
+          "content": [
+            {
+              "type": "paragraph",
+              "children": [
+                {
+                  "type": "text",
+                  "text": "Demo Blog Content"
+                }
+              ]
+            }
+          ],
+          "published": "2025-11-20",
+          "isPublished": false
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "pagination": {
+      "page": 1,
+      "pageSize": 25,
+      "pageCount": 1,
+      "total": 3
+    }
+  }
+}
