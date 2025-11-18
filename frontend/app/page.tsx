@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowRight, BookOpen, TrendingUp, ChevronDown } from 'lucide-react';
+import { ArrowRight, BookOpen, TrendingUp, ChevronDown, Calendar, User } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 
 interface Category {
@@ -13,6 +13,32 @@ interface Tag {
   id: number;
   name: string;
   slug: string;
+}
+
+interface Blog {
+  id: number;
+  documentId: string;
+  title: string;
+  slug: string;
+  description: string;
+  published: string;
+  cover: {
+    url: string;
+    alternativeText: string;
+    formats?: {
+      small?: { url: string };
+      thumbnail?: { url: string };
+    };
+  };
+  author: {
+    name: string;
+    bio?: string;
+  };
+  category: {
+    name: string;
+    slug: string;
+  };
+  tags: Tag[];
 }
 
 interface CustomDropdownProps {
@@ -88,6 +114,7 @@ export default function Home() {
   const [tags, setTags] = useState<Tag[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedTag, setSelectedTag] = useState<string>('');
+  const [blogs, setBlogs] = useState<Blog[]>([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -112,7 +139,18 @@ export default function Home() {
       .then(res => res.json())
       .then(data => setTags(data.data || []))
       .catch(err => console.error('Error fetching tags:', err));
+
+    fetch('http://localhost:1337/api/blogs?populate=*')
+      .then(res => res.json())
+      .then(data => setBlogs(data.data || []))
+      .catch(err => console.error('Error fetching blogs:', err));
   }, []);
+
+  const filteredBlogs = blogs.filter(blog => {
+    const categoryMatch = !selectedCategory || blog.category.slug === selectedCategory;
+    const tagMatch = !selectedTag || blog.tags.some(tag => tag.slug === selectedTag);
+    return categoryMatch && tagMatch;
+  });
 
   return (
     <div className="relative min-h-screen">
@@ -158,7 +196,7 @@ export default function Home() {
           </h1>
 
           <p className="text-xl text-white/70 max-w-2xl mb-12 leading-relaxed font-light">
-            Discover stories that glide through your mind with elegance. 
+            Discover blogs that glide through your mind with elegance. 
             A curated collection of thoughts worth reading.
           </p>
 
@@ -186,6 +224,88 @@ export default function Home() {
               placeholder="All Tags"
             />
           </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-8 pb-24">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
+              Curated Narratives
+            </h2>
+            <p className="text-white/60 text-lg">
+              {filteredBlogs.length} {filteredBlogs.length === 1 ? 'story' : 'stories'} that resonate
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredBlogs.map(blog => (
+              <div
+                key={blog.id}
+                className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden hover:bg-white/10 hover:border-white/20 transition-all duration-300 shadow-lg hover:shadow-2xl"
+              >
+                <div className="relative h-48 overflow-hidden">
+                  <img
+                    src={`http://localhost:1337${blog.cover.formats?.small?.url || blog.cover.url}`}
+                    alt={blog.cover.alternativeText}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div className="p-6">
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <h3 className="text-xl font-bold text-white line-clamp-2 group-hover:text-white/90 transition-colors flex-1">
+                      {blog.title}
+                    </h3>
+                    <span className="px-3 py-1 bg-white/10 border border-white/20 text-white/80 rounded-full text-xs font-medium whitespace-nowrap">
+                      {blog.category.name}
+                    </span>
+                  </div>
+
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <p className="text-white/60 text-sm line-clamp-3 flex-1">
+                      {blog.description}
+                    </p>
+                    <div className="flex flex-wrap gap-2 justify-end">
+                      {blog.tags.map(tag => (
+                        <span
+                          key={tag.id}
+                          className="px-2 py-1 bg-white/5 border border-white/10 text-white/70 rounded-full text-xs whitespace-nowrap"
+                        >
+                          {tag.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-white/50" />
+                      <span className="text-white/70 text-sm">{blog.author.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-white/50" />
+                      <span className="text-white/70 text-sm">
+                        {new Date(blog.published).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {filteredBlogs.length === 0 && (
+            <div className="text-center py-16">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-white/5 backdrop-blur-md border border-white/10 rounded-full mb-4">
+                <BookOpen className="w-8 h-8 text-white/50" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">No Stories Found</h3>
+              <p className="text-white/60">Try adjusting your filters to discover more content</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
