@@ -284,6 +284,7 @@ export default function Home() {
             {filteredBlogs.map(blog => (
               <div
                 key={blog.id}
+                onClick={() => router.push(`blog/${blog.id}`)}
                 className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden hover:bg-white/10 hover:border-white/20 transition-all duration-300 shadow-lg hover:shadow-2xl"
               >
                 <div className="relative h-48 overflow-hidden">
