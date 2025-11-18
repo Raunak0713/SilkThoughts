@@ -1,6 +1,7 @@
 "use client"
 
 import { ArrowRight, BookOpen, TrendingUp, ChevronDown, Calendar, User } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 
 interface Category {
@@ -31,14 +32,39 @@ interface Blog {
     };
   };
   author: {
+    id: number;
     name: string;
     bio?: string;
+    avatar?: {
+      url: string;
+      alternativeText?: string;
+      formats?: {
+        thumbnail?: { url: string };
+        small?: { url: string };
+      };
+    };
   };
   category: {
     name: string;
     slug: string;
   };
   tags: Tag[];
+}
+
+interface Author {
+  id: number;
+  documentId: string;
+  name: string;
+  email: string;
+  bio: string;
+  avatar?: {
+    url: string;
+    alternativeText?: string;
+    formats?: {
+      thumbnail?: { url: string };
+      small?: { url: string };
+    };
+  };
 }
 
 interface CustomDropdownProps {
@@ -115,6 +141,8 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedTag, setSelectedTag] = useState<string>('');
   const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [authors, setAuthors] = useState<Author[]>([]);
+  const router = useRouter()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -144,7 +172,23 @@ export default function Home() {
       .then(res => res.json())
       .then(data => setBlogs(data.data || []))
       .catch(err => console.error('Error fetching blogs:', err));
+
+    fetch('http://localhost:1337/api/authors?populate=*')
+      .then(res => res.json())
+      .then(data => setAuthors(data.data || []))
+      .catch(err => console.error('Error fetching authors:', err));
   }, []);
+
+  const getAvatarUrl = (author: Author | Blog['author']) => {
+    if (author?.avatar?.url) {
+      return `http://localhost:1337${author.avatar.formats?.thumbnail?.url || author.avatar.formats?.small?.url || author.avatar.url}`;
+    }
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(author?.name)}&background=ffffff&color=1e293b&size=128`;
+  };
+
+  const getAuthorById = (id : number) => {
+    return authors.find(author => author.id === id)
+  }
 
   const filteredBlogs = blogs.filter(blog => {
     const categoryMatch = !selectedCategory || blog.category.slug === selectedCategory;
@@ -210,30 +254,30 @@ export default function Home() {
               Latest Posts
             </button>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <CustomDropdown
-              options={categories}
-              value={selectedCategory}
-              onChange={setSelectedCategory}
-              placeholder="All Categories"
-            />
-            <CustomDropdown
-              options={tags}
-              value={selectedTag}
-              onChange={setSelectedTag}
-              placeholder="All Tags"
-            />
-          </div>
         </div>
 
         <div className="max-w-7xl mx-auto px-8 pb-24">
-          <div className="text-center mb-16">
+          <div className="text-center mb-8">
             <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
               Curated Narratives
             </h2>
-            <p className="text-white/60 text-lg">
+            <p className="text-white/60 text-lg mb-8">
               {filteredBlogs.length} {filteredBlogs.length === 1 ? 'story' : 'stories'} that resonate
             </p>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <CustomDropdown
+                options={categories}
+                value={selectedCategory}
+                onChange={setSelectedCategory}
+                placeholder="All Categories"
+              />
+              <CustomDropdown
+                options={tags}
+                value={selectedTag}
+                onChange={setSelectedTag}
+                placeholder="All Tags"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -252,8 +296,9 @@ export default function Home() {
 
                 <div className="p-6">
                   <div className="flex items-start justify-between gap-4 mb-3">
-                    <h3 className="text-xl font-bold text-white line-clamp-2 group-hover:text-white/90 transition-colors flex-1">
-                      {blog.title}
+                    <h3 className="text-xl font-bold text-white group-hover:text-white/90 transition-colors flex-1">
+                      {blog.title.split(' ').slice(0, 2).join(' ')}
+                      {blog.title.split(' ').length > 2 ? '...' : ''}
                     </h3>
                     <span className="px-3 py-1 bg-white/10 border border-white/20 text-white/80 rounded-full text-xs font-medium whitespace-nowrap">
                       {blog.category.name}
@@ -261,11 +306,13 @@ export default function Home() {
                   </div>
 
                   <div className="flex items-start justify-between gap-4 mb-4">
-                    <p className="text-white/60 text-sm line-clamp-3 flex-1">
-                      {blog.description}
+                    <p className="text-white/60 text-sm flex-1">
+                      {blog.description.length > 25 
+                        ? `${blog.description.substring(0, 25)}...` 
+                        : blog.description}
                     </p>
                     <div className="flex flex-wrap gap-2 justify-end">
-                      {blog.tags.map(tag => (
+                      {blog.tags.slice(0, 1).map(tag => (
                         <span
                           key={tag.id}
                           className="px-2 py-1 bg-white/5 border border-white/10 text-white/70 rounded-full text-xs whitespace-nowrap"
@@ -273,12 +320,21 @@ export default function Home() {
                           {tag.name}
                         </span>
                       ))}
+                      {blog.tags.length > 1 && (
+                        <span className="px-2 py-1 bg-white/5 border border-white/10 text-white/70 rounded-full text-xs whitespace-nowrap">
+                          +{blog.tags.length - 1}
+                        </span>
+                      )}
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between pt-4 border-t border-white/10">
                     <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-white/50" />
+                      <img 
+                        src={getAvatarUrl(getAuthorById(blog.author.id)!)}
+                        alt={blog.author.name}
+                        className="w-6 h-6 rounded-full"
+                      />
                       <span className="text-white/70 text-sm">{blog.author.name}</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -306,6 +362,43 @@ export default function Home() {
               <p className="text-white/60">Try adjusting your filters to discover more content</p>
             </div>
           )}
+        </div>
+
+        <div className="max-w-7xl mx-auto px-8 pb-24">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
+              Meet Our Authors
+            </h2>
+            <p className="text-white/60 text-lg">
+              The voices behind the stories
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {authors.map(author => (
+              <div
+                key={author.id}
+                onClick={() => router.push(`/author/${author.id}`)}
+                className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 hover:bg-white/10 hover:border-white/20 transition-all duration-300 shadow-lg hover:shadow-2xl"
+              >
+                <div className="flex items-center gap-4">
+                  <img 
+                    src={getAvatarUrl(author)}
+                    alt={author.name}
+                    className="shrink-0 w-16 h-16 rounded-full border-2 border-white/20"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-xl font-bold text-white mb-1 group-hover:text-white/90 transition-colors">
+                      {author.name}
+                    </h3>
+                    <p className="text-white/60 text-sm mb-2">{author.email}</p>
+                    <p className="text-white/70 text-sm line-clamp-2">{author.bio}</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-white/50 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
