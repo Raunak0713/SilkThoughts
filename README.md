@@ -7,7 +7,7 @@ A modern blogging platform built with Next.js and Strapi.
 
 ## Project Structure
 
-```http
+```
 silkthoughts/
 ├── frontend/    # Next.js application
 └── backend/     # Strapi CMS
@@ -27,12 +27,12 @@ silkthoughts/
 cd backend
 ```
 2.Install Dependency
-```http
+```
 npm install
 ```
 
 3.Create a ```.env``` file in the backend directory and configure your environment variables:
-```http
+```
 HOST=0.0.0.0
 PORT=1337
 APP_KEYS=your-app-keys
@@ -43,7 +43,7 @@ JWT_SECRET=your-jwt-secret
 ```
 
 4.Start the development server
-```http
+```
 npm run develop
 ```
 5.Create your first admin user by visiting http://localhost:1337/admin
@@ -52,21 +52,21 @@ npm run develop
 
 1.Navigate to the frontend directory:
 
-```http
+```
 cd frontend
 ```
 2.Install Dependency
-```http
+```
 npm install
 ```
 
 3.Create a ```.env.local``` file in the backend directory and configure your environment variables:
-```http
+```
 NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
 ```
 
 4.Start the development server
-```http
+```
 npm run dev
 ```
 5.Open your browser and visit http://localhost:3000
