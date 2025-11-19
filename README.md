@@ -23,7 +23,7 @@ silkthoughts/
 ### Backend
 1.Navigate to the backend directory:
 
-```http
+```
 cd backend
 ```
 2.Install Dependency
