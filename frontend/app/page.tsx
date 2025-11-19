@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowRight, BookOpen, TrendingUp, ChevronDown, Calendar, User } from 'lucide-react';
+import { ArrowRight, BookOpen, TrendingUp, ChevronDown, Calendar, User, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 
@@ -142,7 +142,8 @@ export default function Home() {
   const [selectedTag, setSelectedTag] = useState<string>('');
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [authors, setAuthors] = useState<Author[]>([]);
-  const router = useRouter()
+  const [authorSearchQuery, setAuthorSearchQuery] = useState<string>('');
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -186,9 +187,20 @@ export default function Home() {
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(author?.name)}&background=ffffff&color=1e293b&size=128`;
   };
 
-  const getAuthorById = (id : number) => {
-    return authors.find(author => author.id === id)
-  }
+  const getAuthorById = (id: number) => {
+    return authors.find(author => author.id === id);
+  };
+
+  const filteredAuthors = authors.filter(author => {
+    if (!authorSearchQuery) return true;
+
+    const searchLower = authorSearchQuery.toLowerCase();
+    return (
+      author.name.toLowerCase().includes(searchLower) ||
+      author.email.toLowerCase().includes(searchLower) ||
+      author.bio.toLowerCase().includes(searchLower)
+    );
+  });
 
   const filteredBlogs = blogs.filter(blog => {
     const categoryMatch = !selectedCategory || blog.category.slug === selectedCategory;
@@ -199,19 +211,19 @@ export default function Home() {
   return (
     <div className="relative min-h-screen">
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out ${
-        isScrolled 
-          ? 'py-4' 
+        isScrolled
+          ? 'py-4'
           : 'py-6'
       }`}>
         <div className={`mx-auto transition-all duration-500 ease-in-out ${
-          isScrolled 
-            ? 'max-w-4xl px-6 py-3 backdrop-blur-md rounded-full shadow-2xl shadow-black/10' 
+          isScrolled
+            ? 'max-w-4xl px-6 py-3 backdrop-blur-md rounded-full shadow-2xl shadow-black/10'
             : 'max-w-7xl px-8'
         } flex items-center justify-between`}>
           <div className="flex items-center gap-2">
             <span className="text-2xl font-bold text-white tracking-tight">SilkThoughts</span>
           </div>
-          
+
           <div className="hidden md:flex items-center gap-8 text-sm">
             <a href="#" className="text-white/80 hover:text-white transition-colors">Stories</a>
             <a href="#" className="text-white/80 hover:text-white transition-colors">Authors</a>
@@ -240,7 +252,7 @@ export default function Home() {
           </h1>
 
           <p className="text-xl text-white/70 max-w-2xl mb-12 leading-relaxed font-light">
-            Discover blogs that glide through your mind with elegance. 
+            Discover blogs that glide through your mind with elegance.
             A curated collection of thoughts worth reading.
           </p>
 
@@ -308,8 +320,8 @@ export default function Home() {
 
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <p className="text-white/60 text-sm flex-1">
-                      {blog.description.length > 25 
-                        ? `${blog.description.substring(0, 25)}...` 
+                      {blog.description.length > 25
+                        ? `${blog.description.substring(0, 25)}...`
                         : blog.description}
                     </p>
                     <div className="flex flex-wrap gap-2 justify-end">
@@ -331,7 +343,7 @@ export default function Home() {
 
                   <div className="flex items-center justify-between pt-4 border-t border-white/10">
                     <div className="flex items-center gap-2">
-                      <img 
+                      <img
                         src={getAvatarUrl(getAuthorById(blog.author.id)!)}
                         alt={blog.author.name}
                         className="w-6 h-6 rounded-full"
@@ -341,8 +353,8 @@ export default function Home() {
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-white/50" />
                       <span className="text-white/70 text-sm">
-                        {new Date(blog.published).toLocaleDateString('en-US', { 
-                          month: 'short', 
+                        {new Date(blog.published).toLocaleDateString('en-US', {
+                          month: 'short',
                           day: 'numeric',
                           year: 'numeric'
                         })}
@@ -375,15 +387,36 @@ export default function Home() {
             </p>
           </div>
 
+          <div className="flex justify-center mb-8">
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
+              <input
+                type="text"
+                placeholder="Search authors by name, email, or bio..."
+                value={authorSearchQuery}
+                onChange={(e) => setAuthorSearchQuery(e.target.value)}
+                className="w-full pl-12 pr-6 py-3 bg-white/5 backdrop-blur-md border border-white/20 text-white placeholder-white/50 rounded-full text-sm focus:outline-none focus:border-white/40 hover:bg-white/10 transition-all"
+              />
+              {authorSearchQuery && (
+                <button
+                  onClick={() => setAuthorSearchQuery('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors text-sm"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {authors.map(author => (
+            {filteredAuthors.map(author => (
               <div
                 key={author.id}
                 onClick={() => router.push(`/author/${author.id}`)}
                 className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 hover:bg-white/10 hover:border-white/20 transition-all duration-300 shadow-lg hover:shadow-2xl"
               >
                 <div className="flex items-center gap-4">
-                  <img 
+                  <img
                     src={getAvatarUrl(author)}
                     alt={author.name}
                     className="shrink-0 w-16 h-16 rounded-full border-2 border-white/20"
@@ -400,6 +433,16 @@ export default function Home() {
               </div>
             ))}
           </div>
+
+          {filteredAuthors.length === 0 && (
+            <div className="text-center py-16">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-white/5 backdrop-blur-md border border-white/10 rounded-full mb-4">
+                <User className="w-8 h-8 text-white/50" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">No Authors Found</h3>
+              <p className="text-white/60">Try adjusting your search query</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

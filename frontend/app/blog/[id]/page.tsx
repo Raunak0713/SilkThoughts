@@ -9,7 +9,7 @@ import {
   Share2,
   Sparkles,
 } from "lucide-react";
-import { useState, useEffect, JSX } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import {
   BlocksRenderer,
@@ -253,12 +253,24 @@ export default function BlogPage() {
                       5: "text-base md:text-xl font-semibold text-white mb-2 md:mb-3 mt-3 md:mt-5",
                       6: "text-sm md:text-lg font-semibold text-white mb-2 md:mb-3 mt-2 md:mt-4",
                     };
-                    const Tag = `h${level}` as keyof JSX.IntrinsicElements;
-                    return (
-                      <Tag className={styles[level as keyof typeof styles]}>
-                        {children}
-                      </Tag>
-                    );
+                    const className = styles[level as keyof typeof styles];
+                    
+                    switch (level) {
+                      case 1:
+                        return <h1 className={className}>{children}</h1>;
+                      case 2:
+                        return <h2 className={className}>{children}</h2>;
+                      case 3:
+                        return <h3 className={className}>{children}</h3>;
+                      case 4:
+                        return <h4 className={className}>{children}</h4>;
+                      case 5:
+                        return <h5 className={className}>{children}</h5>;
+                      case 6:
+                        return <h6 className={className}>{children}</h6>;
+                      default:
+                        return <h2 className={className}>{children}</h2>;
+                    }
                   },
 
                   list: ({ children, format }) => {
